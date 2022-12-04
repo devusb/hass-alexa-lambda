@@ -1,16 +1,16 @@
 package main
 
 import (
-        "context"
-        "github.com/aws/aws-lambda-go/lambda"
-        "encoding/json"
-		"bytes"
-		"io/ioutil"
-		"net/http"
-		"os"
-		"fmt"
-		"tailscale.com/tsnet"
-		"time"
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-lambda-go/lambda"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"tailscale.com/tsnet"
+	"time"
 )
 
 func HandleRequest(ctx context.Context, event json.RawMessage) (json.RawMessage, error) {
@@ -19,11 +19,11 @@ func HandleRequest(ctx context.Context, event json.RawMessage) (json.RawMessage,
 
 	auth := "Bearer "
 	// use token from environment if present
-	if token_present { 
+	if token_present {
 		auth += token_env
 	} else {
 		var f interface{}
-		_  = json.Unmarshal(event, &f)
+		_ = json.Unmarshal(event, &f)
 		m := f.(map[string]interface{})["directive"].(map[string]interface{})["endpoint"].(map[string]interface{})["scope"].(map[string]interface{})
 		auth += fmt.Sprint(m["token"])
 	}
@@ -34,8 +34,8 @@ func HandleRequest(ctx context.Context, event json.RawMessage) (json.RawMessage,
 	req.Header.Set("Content-Type", "application/json")
 
 	s := &tsnet.Server{
-		Dir: "/tmp",
-		Hostname: "hass-alexa",
+		Dir:       "/tmp",
+		Hostname:  "hass-alexa",
 		Ephemeral: true,
 	}
 
@@ -47,19 +47,19 @@ func HandleRequest(ctx context.Context, event json.RawMessage) (json.RawMessage,
 			DialContext: s.Dial, // use the tailscale dialer
 		},
 	}
-	time.Sleep(1500*time.Millisecond) // wait for tailnet connection to come up
-	
+	time.Sleep(1500 * time.Millisecond) // wait for tailnet connection to come up
+
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 
-	body, err:= ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 
 	return json.RawMessage(body), err
 }
 
 func main() {
-        lambda.Start(HandleRequest)
+	lambda.Start(HandleRequest)
 }
