@@ -1,4 +1,4 @@
-module github.com/devusb/hass-alexa-lambda
+module github.com/devusb/hasslexa
 
 go 1.19
 
